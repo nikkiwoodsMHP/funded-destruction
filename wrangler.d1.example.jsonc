@@ -1,0 +1,21 @@
+{
+  "name": "holy-resonance-a508",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-07",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/editor/*"]
+  },
+  "vars": {
+    "INTAKE_ENABLED": "false",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "EDITOR_EMAILS": ""
+  },
+  "d1_databases": [{
+    "binding": "FD_DB",
+    "database_name": "funded-destruction-preview",
+    "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID"
+  }]
+}
