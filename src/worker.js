@@ -71,7 +71,7 @@ async function api(req,env,path,u){
     database_status=found.size===6?"ready":found.size===0?"schema_missing":"schema_incomplete";
    }catch{database_status="unavailable";}
   }
-  return out({service:"funded-destruction",database_connected:database_status==="ready",database_status,intake_enabled:env.INTAKE_ENABLED==="true"&&database_status==="ready"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY});
+  return out({service:"funded-destruction",database_connected:database_status==="ready",database_status,preview_initializer_available:env.PREVIEW_BOOTSTRAP==="true",intake_enabled:env.INTAKE_ENABLED==="true"&&database_status==="ready"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY});
  }
  if(req.method==="GET"&&path==="/api/config")return out({intake_enabled:env.INTAKE_ENABLED==="true"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY,turnstile_site_key:env.TURNSTILE_SITE_KEY||null});
  const editor=path.startsWith("/api/editor/")?await access(req,env):null;
