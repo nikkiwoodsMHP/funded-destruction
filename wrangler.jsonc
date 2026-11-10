@@ -11,8 +11,7 @@
     ]
   },
   "vars": {
-    "INTAKE_ENABLED": "false",
-    "PREVIEW_BOOTSTRAP": "true"
+    "INTAKE_ENABLED": "false"
   },
   "d1_databases": [
     {
