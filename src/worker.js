@@ -45,22 +45,7 @@ async function verifiedTurnstile(req,env,token){
  }catch{return false}
 }
 
-// Temporary preview-only migration. Each statement is fixed in source, never user supplied.
-async function initializePreview(env) {
-  if (!env.FD_DB || env.PREVIEW_BOOTSTRAP !== "true") return {error:"Unavailable"};
-  const statements=["CREATE TABLE IF NOT EXISTS companies (\n  id INTEGER PRIMARY KEY,\n  slug TEXT NOT NULL UNIQUE,\n  name TEXT NOT NULL,\n  sector TEXT,\n  legal_entity_name TEXT,\n  jurisdiction TEXT,\n  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP\n)","CREATE TABLE IF NOT EXISTS sources (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL,\n  publisher TEXT NOT NULL,\n  url TEXT NOT NULL UNIQUE,\n  publication_date TEXT,\n  status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','approved','rejected')),\n  reviewed_at TEXT\n)","CREATE TABLE IF NOT EXISTS financial_records (\n  id INTEGER PRIMARY KEY,\n  company_id INTEGER NOT NULL REFERENCES companies(id),\n  source_id INTEGER NOT NULL REFERENCES sources(id),\n  category TEXT NOT NULL,\n  record_type TEXT NOT NULL,\n  description TEXT NOT NULL,\n  recipient_name TEXT,\n  amount REAL,\n  currency TEXT DEFAULT 'USD',\n  period_start TEXT,\n  period_end TEXT,\n  evidence_level TEXT NOT NULL DEFAULT 'reported',\n  review_status TEXT NOT NULL DEFAULT 'draft' CHECK(review_status IN ('draft','approved','rejected')),\n  reviewed_at TEXT\n)","CREATE TABLE IF NOT EXISTS relationships (\n  id INTEGER PRIMARY KEY,\n  company_id INTEGER NOT NULL REFERENCES companies(id),\n  source_id INTEGER NOT NULL REFERENCES sources(id),\n  target_name TEXT NOT NULL,\n  relationship_type TEXT NOT NULL,\n  description TEXT,\n  review_status TEXT NOT NULL DEFAULT 'draft' CHECK(review_status IN ('draft','approved','rejected'))\n)","CREATE TABLE IF NOT EXISTS evidence_reports (\n  id TEXT PRIMARY KEY,\n  category TEXT NOT NULL,\n  general_location TEXT NOT NULL,\n  incident_period TEXT,\n  description TEXT NOT NULL,\n  public_source_url TEXT,\n  submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','screening','verifying','investigating','closed')),\n  review_notes TEXT NOT NULL DEFAULT '',\n  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP\n)","CREATE TABLE IF NOT EXISTS editorial_audit (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  report_id TEXT NOT NULL REFERENCES evidence_reports(id),\n  editor_email TEXT NOT NULL,\n  action TEXT NOT NULL,\n  previous_status TEXT,\n  new_status TEXT,\n  occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP\n)","CREATE INDEX IF NOT EXISTS idx_financial_company ON financial_records(company_id,review_status)","CREATE INDEX IF NOT EXISTS idx_relationship_company ON relationships(company_id,review_status)","CREATE INDEX IF NOT EXISTS idx_reports_status ON evidence_reports(status,submitted_at)"];
-  for (const statement of statements) await env.FD_DB.prepare(statement).run();
-  await env.FD_DB.prepare("INSERT INTO companies (slug, name, sector, legal_entity_name, jurisdiction) VALUES\n('mcdonalds', 'McDonald''s', 'Restaurants', 'McDonald''s Corporation', 'United States'),\n('walmart', 'Walmart', 'Retail', 'Walmart Inc.', 'United States'),\n('coca-cola', 'Coca-Cola', 'Beverages', 'The Coca-Cola Company', 'United States'),\n('amazon', 'Amazon', 'Technology and retail', 'Amazon.com, Inc.', 'United States'),\n('nike', 'Nike', 'Apparel', 'NIKE, Inc.', 'United States'),\n('apple', 'Apple', 'Technology', 'Apple Inc.', 'United States')\nON CONFLICT(slug) DO UPDATE SET name=excluded.name, sector=excluded.sector,\nlegal_entity_name=excluded.legal_entity_name, jurisdiction=excluded.jurisdiction").run();
-  const names=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('companies','sources','financial_records','relationships','evidence_reports','editorial_audit')").all();
-  const count=await env.FD_DB.prepare("SELECT count(*) AS total FROM companies WHERE slug IN ('mcdonalds','walmart','coca-cola','amazon','nike','apple')").first();
-  return {tables:(names.results||[]).map(x=>x.name),starter_companies:count?.total??0,ready:names.results?.length===6&&count?.total===6};
-}
-
 async function api(req,env,path,u){
- if(req.method==="GET"&&path==="/api/_preview/bootstrap"){
-  if(env.PREVIEW_BOOTSTRAP!=="true")return err("Not found",404);
-  try{return out(await initializePreview(env));}catch(e){return err("Initialization failed: "+String(e?.message||e).slice(0,200),500)}
- }
 
  if(req.method==="GET"&&path==="/api/health"){
   let database_status="unbound";
@@ -71,7 +56,7 @@ async function api(req,env,path,u){
     database_status=found.size===6?"ready":found.size===0?"schema_missing":"schema_incomplete";
    }catch{database_status="unavailable";}
   }
-  return out({service:"funded-destruction",database_connected:database_status==="ready",database_status,preview_initializer_available:env.PREVIEW_BOOTSTRAP==="true",intake_enabled:env.INTAKE_ENABLED==="true"&&database_status==="ready"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY});
+  return out({service:"funded-destruction",database_connected:database_status==="ready",database_status,intake_enabled:env.INTAKE_ENABLED==="true"&&database_status==="ready"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY});
  }
  if(req.method==="GET"&&path==="/api/config")return out({intake_enabled:env.INTAKE_ENABLED==="true"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY,turnstile_site_key:env.TURNSTILE_SITE_KEY||null});
  const editor=path.startsWith("/api/editor/")?await access(req,env):null;
