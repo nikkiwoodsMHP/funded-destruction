@@ -49,8 +49,9 @@ async function api(req,env,path,u){
   let database_status="unbound";
   if(env.FD_DB){
    try{
-    const probe=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='companies'").first();
-    database_status=probe?"ready":"schema_missing";
+    const tables=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('companies','sources','financial_records','relationships','evidence_reports','editorial_audit')").all();
+    const found=new Set((tables.results||[]).map(row=>row.name));
+    database_status=found.size===6?"ready":found.size===0?"schema_missing":"schema_incomplete";
    }catch{database_status="unavailable";}
   }
   return out({service:"funded-destruction",database_connected:database_status==="ready",database_status,intake_enabled:env.INTAKE_ENABLED==="true"&&database_status==="ready"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY});
@@ -60,8 +61,8 @@ async function api(req,env,path,u){
  if(path.startsWith("/api/editor/")&&!editor)return err("Unauthorized",401);
  if(!env.FD_DB)return err("Database not configured",503);
  try{
-  const schema=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='companies'").first();
-  if(!schema)return err("Database schema not initialized",503);
+  const schema=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('companies','sources','financial_records','relationships','evidence_reports','editorial_audit')").all();
+  if((schema.results||[]).length!==6)return err("Database schema incomplete",503);
  }catch{return err("Database temporarily unavailable",503)}
  try{
  if(req.method==="GET"&&path==="/api/companies"){
