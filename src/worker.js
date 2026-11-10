@@ -58,6 +58,10 @@ async function api(req,env,path,u){
  if(req.method==="GET"&&path==="/api/config")return out({intake_enabled:env.INTAKE_ENABLED==="true"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY,turnstile_site_key:env.TURNSTILE_SITE_KEY||null});
  if(!env.FD_DB)return err("Database not configured",503);
  try{
+  const schema=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='companies'").first();
+  if(!schema)return err("Database schema not initialized",503);
+ }catch{return err("Database temporarily unavailable",503)}
+ try{
  if(req.method==="GET"&&path==="/api/companies"){
   const q=clean(u.searchParams.get("q"),80);
   const rows=q?await env.FD_DB.prepare("SELECT slug,name,sector FROM companies WHERE name LIKE ? ORDER BY name LIMIT 100").bind("%"+q+"%").all():await env.FD_DB.prepare("SELECT slug,name,sector FROM companies ORDER BY name LIMIT 100").all();
