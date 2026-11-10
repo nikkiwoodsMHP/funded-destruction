@@ -12,5 +12,12 @@
   },
   "vars": {
     "INTAKE_ENABLED": "false"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "FD_DB",
+      "database_name": "funded-destruction-preview",
+      "database_id": "dde18b03-e448-4a00-abfd-b702fe024a6d"
+    }
+  ]
 }
