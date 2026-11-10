@@ -154,4 +154,55 @@ const v5OriginalOpenCompany=openCompany;
 openCompany=function(name){v5OriginalOpenCompany(name);queueMicrotask(renderV5)};
 fetch('./mcdonalds-research-lenses.json').then(r=>{if(!r.ok)throw Error('missing');return r.json()}).then(d=>{v5Research=d;renderV5()}).catch(()=>{const e=document.getElementById('source-intelligence');if(e)e.textContent='Additional research register unavailable in this preview.'});
 </script>
+<script>
+/* Database-backed record viewer. Existing sample research stays available when D1 is not configured. */
+(function(){
+const profile=document.getElementById('profile');
+if(!profile)return;
+const panel=document.createElement('section');
+panel.id='approved-d1-research';
+panel.setAttribute('aria-live','polite');
+panel.style.cssText='margin:22px 0;padding:22px;background:#fffefa;border:1px solid #dbe0d7;border-radius:16px';
+profile.append(panel);
+function elem(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;}
+let requestSerial=0;
+async function refreshApprovedResearch(){
+ const serial=++requestSerial;
+ panel.replaceChildren(elem('h2','Approved financial records'),elem('p','Checking whether the verified research database is connected…'));
+ let slug=activeCompany?.slug||activeCompany?.name?.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+ if(!slug)return;
+ try{
+  const response=await fetch('/api/companies/'+encodeURIComponent(slug),{headers:{'Accept':'application/json'}});
+  if(serial!==requestSerial)return;
+  if(response.status===503){panel.replaceChildren(elem('h2','Approved financial records'),elem('p','Database not connected yet. The source-linked pilot below remains available for review.'));return;}
+  if(response.status===404){panel.replaceChildren(elem('h2','Approved financial records'),elem('p','No approved database profile is available for this company yet. The prototype is for research demonstration.'));return;}
+  if(!response.ok)throw Error('Unable to load verified records');
+  const data=await response.json();
+  panel.replaceChildren(elem('h2','Approved financial records'));
+  const records=Array.isArray(data.records)?data.records:[];
+  const links=Array.isArray(data.relationships)?data.relationships:[];
+  panel.append(elem('p',records.length+' approved record(s) and '+links.length+' approved relationship(s). Only records with approved sources are published.'));
+  for(const rec of records){
+   const article=elem('article');article.style.cssText='border-top:1px solid #dbe0d7;padding:14px 0';
+   article.append(elem('h3',rec.recipient_name||rec.record_type||rec.category));
+   const sum=rec.amount===null||rec.amount===undefined?'Amount not provided':new Intl.NumberFormat('en-US',{style:'currency',currency:rec.currency||'USD'}).format(rec.amount);
+   article.append(elem('p',rec.description+' — '+sum));
+   article.append(elem('small',[rec.category,rec.period_start,rec.period_end].filter(Boolean).join(' · ')));
+   if(rec.source_url){try{const u=new URL(rec.source_url);if(u.protocol==='https:'){const a=elem('a',' View original source');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';article.append(a)}}catch{}}
+   panel.append(article);
+  }
+  for(const link of links){
+   const article=elem('article');article.style.cssText='border-top:1px solid #dbe0d7;padding:14px 0';
+   article.append(elem('h3',link.target_name));
+   article.append(elem('p',(link.relationship_type||'Relationship')+' — '+(link.description||'See source')));
+   if(link.source_url){try{const u=new URL(link.source_url);if(u.protocol==='https:'){const a=elem('a',' View source');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';article.append(a)}}catch{}}
+   panel.append(article);
+  }
+ }catch(e){if(serial===requestSerial)panel.replaceChildren(elem('h2','Approved financial records'),elem('p','Live record retrieval is unavailable. Check original sources in the research section below.'))}
+}
+const original=openCompany;
+openCompany=function(name){original(name);refreshApprovedResearch();};
+if(activeCompany)refreshApprovedResearch();
+})();
+</script>
 </body></html>
