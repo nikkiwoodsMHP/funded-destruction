@@ -56,6 +56,8 @@ async function api(req,env,path,u){
   return out({service:"funded-destruction",database_connected:database_status==="ready",database_status,intake_enabled:env.INTAKE_ENABLED==="true"&&database_status==="ready"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY});
  }
  if(req.method==="GET"&&path==="/api/config")return out({intake_enabled:env.INTAKE_ENABLED==="true"&&!!env.TURNSTILE_SECRET&&!!env.TURNSTILE_SITE_KEY,turnstile_site_key:env.TURNSTILE_SITE_KEY||null});
+ const editor=path.startsWith("/api/editor/")?await access(req,env):null;
+ if(path.startsWith("/api/editor/")&&!editor)return err("Unauthorized",401);
  if(!env.FD_DB)return err("Database not configured",503);
  try{
   const schema=await env.FD_DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='companies'").first();
@@ -87,7 +89,6 @@ async function api(req,env,path,u){
   return out({received:true,reference:id.slice(0,8),message:"Received for private screening; publication is not guaranteed."},201);
  }
  if(path.startsWith("/api/editor/")){
-  const editor=await access(req,env);if(!editor)return err("Unauthorized",401);
   if(req.method==="GET"&&path==="/api/editor/reports"){
    const status=u.searchParams.get("status")||"new";if(!statuses.has(status))return err("Invalid status");
    const rows=await env.FD_DB.prepare("SELECT id,category,general_location,incident_period,description,public_source_url,submitted_at,status,review_notes,updated_at FROM evidence_reports WHERE status=? ORDER BY submitted_at DESC LIMIT 50").bind(status).all();
