@@ -37,7 +37,7 @@ test('public profile contains only approved records with approved sources',async
  const db={
   prepare(sql){
    observed.push(sql);
-   return {bind(...args){
+   return {all: async()=>({results: [{name:'companies'},{name:'sources'},{name:'financial_records'},{name:'relationships'},{name:'evidence_reports'},{name:'editorial_audit'}]}),bind(...args){
     return {
       first:async()=>({id:1,slug:'example',name:'Example Company'}),
       all:async()=>({results:[]})
@@ -61,12 +61,12 @@ test('editor API fails closed without Access credentials, even with a D1 binding
 });
 
 test('health distinguishes a ready D1 schema from a bound empty database', async()=>{
- const ready={prepare:()=>({first:async()=>({name:'companies'})})};
+ const ready={prepare:()=>({all:async()=>({results:['companies','sources','financial_records','relationships','evidence_reports','editorial_audit'].map(name=>({name}))})})};
  const readyResponse=await call('/api/health',{}, {...env,FD_DB:ready});
  const readyData=await data(readyResponse);
  assert.equal(readyData.database_status,'ready');
  assert.equal(readyData.database_connected,true);
- const empty={prepare:()=>({first:async()=>null})};
+ const empty={prepare:()=>({all:async()=>({results:[]})})};
  const missingResponse=await call('/api/health',{}, {...env,FD_DB:empty});
  const missingData=await data(missingResponse);
  assert.equal(missingData.database_status,'schema_missing');
