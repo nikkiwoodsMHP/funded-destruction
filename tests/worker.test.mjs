@@ -59,3 +59,16 @@ test('editor API fails closed without Access credentials, even with a D1 binding
  const r=await call('/api/editor/reports',{}, {...env,FD_DB:db});
  assert.equal(r.status,401);
 });
+
+test('health distinguishes a ready D1 schema from a bound empty database', async()=>{
+ const ready={prepare:()=>({first:async()=>({name:'companies'})})};
+ const readyResponse=await call('/api/health',{}, {...env,FD_DB:ready});
+ const readyData=await data(readyResponse);
+ assert.equal(readyData.database_status,'ready');
+ assert.equal(readyData.database_connected,true);
+ const empty={prepare:()=>({first:async()=>null})};
+ const missingResponse=await call('/api/health',{}, {...env,FD_DB:empty});
+ const missingData=await data(missingResponse);
+ assert.equal(missingData.database_status,'schema_missing');
+ assert.equal(missingData.database_connected,false);
+});
