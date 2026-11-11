@@ -45,18 +45,7 @@ async function verifiedTurnstile(req,env,token){
  }catch{return false}
 }
 
-async function seedMcDonaldsPrimarySources(env){
- if(env.RESEARCH_SEED_ENABLED!=="true"||!env.FD_DB)return {error:"Unavailable"};
- const statements=["INSERT INTO sources(title,publisher,url,publication_date,status,reviewed_at) VALUES\n('McDonalds Corporation Political Action Committee: 2025-2026 financial summary','Federal Election Commission','https://www.fec.gov/data/committee/C00063164/',NULL,'approved',CURRENT_TIMESTAMP),\n('McDonalds Reports Fourth Quarter and Full Year 2025 Results','McDonald''s Corporation','https://corporate.mcdonalds.com/corpmcd/our-stories/article/Q4-full-year-2025-results.html','2026-02-11','approved',CURRENT_TIMESTAMP)\nON CONFLICT(url) DO UPDATE SET title=excluded.title,publisher=excluded.publisher,publication_date=excluded.publication_date,status='approved',reviewed_at=CURRENT_TIMESTAMP","INSERT INTO financial_records(company_id,source_id,category,record_type,description,recipient_name,amount,currency,period_start,period_end,evidence_level,review_status,reviewed_at)\nSELECT c.id,s.id,'Political finance','PAC receipts',\n'FEC-reported total receipts for the separately registered McDonald''s Corporation Political Action Committee, Jan. 1, 2025 through Oct. 14, 2026. This is PAC fundraising, NOT direct political contributions made by McDonald''s Corporation.',\n'McDonalds Corporation Political Action Committee',735666.46,'USD','2025-01-01','2026-10-14','Federal Election Commission summary','approved',CURRENT_TIMESTAMP\nFROM companies c JOIN sources s ON s.url='https://www.fec.gov/data/committee/C00063164/' WHERE c.slug='mcdonalds'\nAND NOT EXISTS(SELECT 1 FROM financial_records f WHERE f.company_id=c.id AND f.source_id=s.id AND f.record_type='PAC receipts' AND f.period_start='2025-01-01')","INSERT INTO financial_records(company_id,source_id,category,record_type,description,recipient_name,amount,currency,period_start,period_end,evidence_level,review_status,reviewed_at)\nSELECT c.id,s.id,'Company financial context','Systemwide sales',\n'McDonald''s reported more than $139 billion in worldwide systemwide sales for 2025, including franchised restaurant sales. Systemwide sales are NOT consolidated corporate revenue, political contributions, or evidence of environmental wrongdoing.',\nNULL,NULL,'USD','2025-01-01','2025-12-31','Company earnings release','approved',CURRENT_TIMESTAMP\nFROM companies c JOIN sources s ON s.url='https://corporate.mcdonalds.com/corpmcd/our-stories/article/Q4-full-year-2025-results.html' WHERE c.slug='mcdonalds'\nAND NOT EXISTS(SELECT 1 FROM financial_records f WHERE f.company_id=c.id AND f.source_id=s.id AND f.record_type='Systemwide sales' AND f.period_start='2025-01-01')"];
- for(const sql of statements)await env.FD_DB.prepare(sql).run();
- const r=await env.FD_DB.prepare("SELECT COUNT(*) AS count FROM financial_records f JOIN companies c ON c.id=f.company_id JOIN sources s ON s.id=f.source_id WHERE c.slug='mcdonalds' AND f.review_status='approved' AND s.status='approved'").first();
- return {approved_source_linked_records:r?.count??0,ready:(r?.count??0)>=2};
-}
 async function api(req,env,path,u){
- if(req.method==="GET"&&path==="/api/_preview/seed-research"){
-  if(env.RESEARCH_SEED_ENABLED!=="true")return err("Not found",404);
-  try{return out(await seedMcDonaldsPrimarySources(env));}catch(e){return err("Research import failed: "+String(e?.message||e).slice(0,160),500)}
- }
 
 
  if(req.method==="GET"&&path==="/api/health"){
