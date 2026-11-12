@@ -40,9 +40,19 @@ const $=id=>document.getElementById(id);const escapeHtml=s=>String(s).replace(/[
 function notify(s){$('toast').textContent=s;$('toast').classList.add('show');clearTimeout(window.toastTime);window.toastTime=setTimeout(()=>$('toast').classList.remove('show'),2800)}
 function navigate(view){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id===view));document.querySelectorAll('[data-view]').forEach(el=>el.classList.toggle('active',el.dataset.view===view));$('crumb').textContent=({home:'Discover',profile:'Company profile',trace:'Trace My Dollar',watch:'My Watchlist',sources:'Data & Sources'})[view];window.scrollTo({top:0,behavior:'smooth'});if(view==='watch')renderWatch();if(view==='trace'){renderTrace();if(!traceData()&&activeCompany.slug==='mcdonalds')loadVerifiedProfile()}}
 document.querySelectorAll('[data-view]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.view)));
-function renderCompanies(query=''){let matches=companies.filter(c=>c.name.toLowerCase().includes(query.toLowerCase()));$('companycount').textContent=matches.length+' example profiles';$('company-grid').innerHTML=matches.length?matches.map(c=>`<div class="card"><div class="logo">${c.initials}</div><strong>${escapeHtml(c.name)}</strong><p>${escapeHtml(c.category)}<br>${c.slug==='mcdonalds'?'Selected primary-source records available':'Research profile awaiting verified records'}</p><div class="cardfoot"><span class="pill">${c.slug==='mcdonalds'?'SOURCE-LINKED PILOT':'DATA PENDING'}</span><button class="ghost company-link" data-company="${escapeHtml(c.name)}">Explore ↗</button></div></div>`).join(''):`<div class="card" style="grid-column:1/-1"><strong>No example profile found</strong><p>Additional company coverage requires source verification. Suggest a company for the future research backlog.</p></div>`;document.querySelectorAll('.company-link').forEach(b=>b.addEventListener('click',()=>openCompany(b.dataset.company)))}
+function renderCompanies(query=''){
+ const matches=companies.filter(c=>c.name.toLowerCase().includes(query.toLowerCase()));
+ $('companycount').textContent=matches.length+' company profiles'+(window.fdCatalogLoaded?' · live D1 research':' · loading database');
+ $('company-grid').innerHTML=matches.length?matches.map(c=>{
+  const count=Number(c.approved_records||0);
+  const caption=count>0?count+' approved source-linked record'+(count===1?'':'s'):'No approved financial records yet';
+  const label=count>0?'SOURCED RESEARCH':'RESEARCH PENDING';
+  return `<div class="card"><div class="logo">${escapeHtml(c.initials||c.name.slice(0,1))}</div><strong>${escapeHtml(c.name)}</strong><p>${escapeHtml(c.category||'Sector not specified')}<br>${escapeHtml(caption)}</p><div class="cardfoot"><span class="pill">${label}</span><button class="ghost company-link" data-company="${escapeHtml(c.name)}">Explore ↗</button></div></div>`;
+ }).join(''):`<div class="card" style="grid-column:1/-1"><strong>No matching profile</strong><p>Additional companies may be added after source verification.</p></div>`;
+ document.querySelectorAll('.company-link').forEach(b=>b.addEventListener('click',()=>openCompany(b.dataset.company)));
+}
 function openCompany(name){activeCompany=companies.find(c=>c.name===name)||companies[0];$('profile-name').textContent=activeCompany.name;currentTab='Political spending';document.querySelectorAll('[data-tab]').forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));renderProfile();navigate('profile')}
-function renderProfile(){$('watch-toggle').textContent=(watch.includes(activeCompany.name)?'★ Remove from watchlist':'☆ Add to watchlist');let content={"Political spending":['Political spending','Campaign contributions, lobbying expenditures, and political-action-committee records require entity-level source verification. An employee-funded PAC must not be presented as a corporation’s direct donation.'],"Environmental records":['Environmental records','Environmental compliance, enforcement actions, company statements, and investigative findings must be presented with jurisdiction and outcome clearly labeled.'],"Ownership":['Ownership and subsidiaries','The ownership network will distinguish legal parents, subsidiaries, brands, and investors. Ownership alone does not demonstrate a particular payment.'],"Sources & methodology":['Source register','Every published financial claim will have a source link, reporting period, entity match, and review status. No company-specific claims have been approved for this prototype.']}[currentTab];$('profile-panel').innerHTML=`<div class="record"><div style="font-size:35px">⌕</div><h3>${content[0]}</h3><p>${content[1]}</p><span class="pill">VERIFICATION PENDING</span><div class="source-links" style="margin-top:19px"><a href="https://www.fec.gov/data/" target="_blank" rel="noopener">FEC data ↗</a><a href="https://www.sec.gov/edgar/search/" target="_blank" rel="noopener">SEC filings ↗</a><a href="https://echo.epa.gov/" target="_blank" rel="noopener">EPA ECHO ↗</a></div></div>`}
+function renderProfile(){$('watch-toggle').textContent=(watch.includes(activeCompany.name)?'★ Remove from watchlist':'☆ Add to watchlist');let content={"Political spending":['Political spending','Campaign contributions, lobbying expenditures, and political-action-committee records require entity-level source verification. An employee-funded PAC must not be presented as a corporation’s direct donation.'],"Environmental records":['Environmental records','Environmental compliance, enforcement actions, company statements, and investigative findings must be presented with jurisdiction and outcome clearly labeled.'],"Ownership":['Ownership and subsidiaries','The ownership network will distinguish legal parents, subsidiaries, brands, and investors. Ownership alone does not demonstrate a particular payment.'],"Sources & methodology":['Source register','Every published financial claim will have a source link, reporting period, entity match, and review status. Approved records and their source links appear below when available; unapproved claims are not displayed.']}[currentTab];$('profile-panel').innerHTML=`<div class="record"><div style="font-size:35px">⌕</div><h3>${content[0]}</h3><p>${content[1]}</p><span class="pill">VERIFICATION PENDING</span><div class="source-links" style="margin-top:19px"><a href="https://www.fec.gov/data/" target="_blank" rel="noopener">FEC data ↗</a><a href="https://www.sec.gov/edgar/search/" target="_blank" rel="noopener">SEC filings ↗</a><a href="https://echo.epa.gov/" target="_blank" rel="noopener">EPA ECHO ↗</a></div></div>`}
 document.querySelectorAll('[data-tab]').forEach(t=>t.addEventListener('click',()=>{currentTab=t.dataset.tab;document.querySelectorAll('[data-tab]').forEach(a=>a.classList.toggle('active',a===t));renderProfile()}));
 function saveWatch(){try{localStorage.setItem('ftm-watch-v1',JSON.stringify(watch))}catch{notify('This browser cannot save your watchlist')}}
 $('watch-toggle').addEventListener('click',()=>{if(watch.includes(activeCompany.name)){watch=watch.filter(x=>x!==activeCompany.name);notify('Removed from your watchlist')}else{watch.push(activeCompany.name);notify('Saved to your watchlist')}saveWatch();renderProfile()});
@@ -203,6 +213,36 @@ async function refreshApprovedResearch(){
 const original=openCompany;
 openCompany=function(name){original(name);refreshApprovedResearch();};
 if(activeCompany)refreshApprovedResearch();
+})();
+</script>
+<script>
+/* The authoritative catalog comes from D1. Static six-company data remains as a fallback only. */
+(async function loadFundedDestructionCatalog(){
+ try{
+  const response=await fetch('/api/companies',{headers:{'Accept':'application/json'},cache:'no-store'});
+  if(!response.ok)throw Error('Catalog unavailable');
+  const json=await response.json();
+  if(!Array.isArray(json.companies))throw Error('Invalid catalog');
+  const normalized=json.companies.filter(c=>c&&typeof c.name==='string'&&typeof c.slug==='string').map(c=>({
+   name:c.name,
+   slug:c.slug,
+   category:c.sector||'Sector unspecified',
+   initials:c.name.trim().charAt(0).toUpperCase(),
+   approved_records:Number(c.approved_records||0),
+   approved_relationships:Number(c.approved_relationships||0)
+  }));
+  if(normalized.length===0)return;
+  const currentSlug=activeCompany?.slug;
+  companies.splice(0,companies.length,...normalized);
+  activeCompany=companies.find(c=>c.slug===currentSlug)||companies[0];
+  window.fdCatalogLoaded=true;
+  renderCompanies(document.getElementById('company-search')?.value||'');
+  renderWatch();
+  if(document.getElementById('profile')?.classList.contains('active'))renderProfile();
+ }catch(e){
+  const note=document.getElementById('companycount');
+  if(note)note.textContent='Research preview · live directory unavailable';
+ }
 })();
 </script>
 </body></html>
