@@ -71,7 +71,8 @@ async function api(req,env,path,u){
  try{
  if(req.method==="GET"&&path==="/api/companies"){
   const q=clean(u.searchParams.get("q"),80);
-  const rows=q?await env.FD_DB.prepare("SELECT slug,name,sector FROM companies WHERE name LIKE ? ORDER BY name LIMIT 100").bind("%"+q+"%").all():await env.FD_DB.prepare("SELECT slug,name,sector FROM companies ORDER BY name LIMIT 100").all();
+  const catalogSQL="SELECT c.slug,c.name,c.sector,\n (SELECT COUNT(*) FROM financial_records f JOIN sources s ON s.id=f.source_id\n WHERE f.company_id=c.id AND f.review_status='approved' AND s.status='approved') AS approved_records,\n (SELECT COUNT(*) FROM relationships r JOIN sources s ON s.id=r.source_id\n WHERE r.company_id=c.id AND r.review_status='approved' AND s.status='approved') AS approved_relationships\n FROM companies c";
+  const rows=q?await env.FD_DB.prepare(catalogSQL+" WHERE c.name LIKE ? ORDER BY c.name LIMIT 100").bind("%"+q+"%").all():await env.FD_DB.prepare(catalogSQL+" ORDER BY c.name LIMIT 100").all();
   return out({companies:rows.results,note:"Listing does not imply misconduct."});
  }
  const cm=path.match(/^\/api\/companies\/([a-z0-9-]+)\/?$/);
