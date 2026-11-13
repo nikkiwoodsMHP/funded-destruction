@@ -72,3 +72,19 @@ test('health distinguishes a ready D1 schema from a bound empty database', async
  assert.equal(missingData.database_status,'schema_missing');
  assert.equal(missingData.database_connected,false);
 });
+
+test('research overview exposes only approved, source-linked aggregate counts',async()=>{
+ const observed=[];
+ const fakeDB={prepare(sql){
+  observed.push(sql);
+  if(sql.includes('sqlite_master'))return {all:async()=>({results:['companies','sources','financial_records','relationships','evidence_reports','editorial_audit'].map(name=>({name}))})};
+  return {first:async()=>({companies:6,approved_financial_records:10,approved_enforcement_records:3,approved_relationships:1})};
+ }};
+ const response=await call('/api/research/overview',{}, {...env,FD_DB:fakeDB});
+ assert.equal(response.status,200);
+ const value=await data(response);
+ assert.deepEqual(value.counts,{companies:6,approved_financial_records:10,approved_enforcement_records:3,approved_relationships:1});
+ assert(observed.some(sql=>sql.includes("f.review_status='approved'")&&sql.includes("s.status='approved'")));
+ assert(observed.some(sql=>sql.includes("r.review_status='approved'")&&sql.includes("s.status='approved'")));
+ assert.match(value.disclaimer,/inclusion is not an allegation/);
+});
