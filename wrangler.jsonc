@@ -11,7 +11,8 @@
     ]
   },
   "vars": {
-    "INTAKE_ENABLED": "false"
+    "INTAKE_ENABLED": "false",
+    "EPA_SEED_ENABLED": "true"
   },
   "d1_databases": [
     {
