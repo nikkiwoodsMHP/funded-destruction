@@ -74,12 +74,12 @@ function toMoney(amount,currency){if(amount===null||amount===undefined)return 'A
 function displayVerifiedRecords(data){
  const panel=$('profile-panel');if(!panel||data.company.slug!==activeCompany.slug)return;
  const title=({"Political spending":"Political spending","Environmental records":"Environmental records","Ownership":"Ownership and subsidiaries","Sources & methodology":"Source register"})[currentTab];
- const key=({"Political spending":"political","Environmental records":"environment","Ownership":"ownership","Sources & methodology":"sources"})[currentTab];
- const items=key==='sources'?data.sources:(data.records||[]).filter(r=>r.category===key);
+ const items=currentTab==='Sources & methodology'?(data.records||[]):currentTab==='Environmental records'?(data.records||[]).filter(r=>r.category==='Environmental enforcement'):currentTab==='Political spending'?(data.records||[]).filter(r=>/political|PAC|lobby/i.test([r.category,r.record_type].join(' '))):currentTab==='Ownership'?(data.relationships||[]):[];
+ const key=currentTab==='Sources & methodology'?'sources':'records';
  if(!items||items.length===0){originalProfileRender();return}
- panel.innerHTML='<div class="panel"><h3>'+escapeHtml(title)+'</h3><p><b>Selected records only; not a complete contribution total.</b> McDonald’s PAC is funded by employee and franchisee contributions, not corporate treasury funds. </p><p>Published records are individually reviewed and linked to sources. Amounts represent disclosed transactions, not inferred uses of consumer purchases.</p>'+items.map(r=>{
+ panel.innerHTML='<div class="panel"><h3>'+escapeHtml(title)+'</h3><p><b>Approved source-linked records only.</b> Legal findings, settlements, corporate revenue and political activity must be distinguished. </p><p>Published records are individually reviewed and linked to sources. Amounts represent disclosed transactions, not inferred uses of consumer purchases.</p>'+items.map(r=>{
  let u=safeSourceUrl(r.source_url||r.url);
- let heading=r.description||r.title||'Source record';let kind=r.record_type||r.publisher||'Public disclosure';
+ let heading=r.description||r.title||'Source record';let kind=r.record_type||r.relationship_type||r.publisher||'Public disclosure';
  let detail=key==='sources'?'':`<div style="font-size:12px;color:#586b60;margin:8px 0">${escapeHtml(r.recipient_name||'')} · ${escapeHtml(r.period_start||'Period not reported')} ${r.period_end?'to '+escapeHtml(r.period_end):''} · ${escapeHtml(toMoney(r.amount,r.currency))}</div>`;
  return `<article class="card" style="margin:12px 0"><small class="overline" style="color:#608152">VERIFIED SOURCE</small><strong>${escapeHtml(heading)}</strong><p>${escapeHtml(kind)}</p>${detail}${u?`<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer">View primary source ↗</a>`:''}</article>`}).join('')+'</div>';
 }
