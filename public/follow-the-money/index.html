@@ -35,7 +35,7 @@
 <p style="font-size:12px;color:var(--muted);margin-top:14px">Coverage is selective. A listed company is not accused of wrongdoing, and absence of a finding does not prove compliance.</p>
 </section><div class="section-head"><h2>Explore company profiles</h2><small id="companycount">Loading company records…</small></div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 18px"><label for="company-research-filter" style="font-weight:600">Research filter</label><select id="company-research-filter" style="padding:10px;border:1px solid var(--rule);border-radius:10px;background:white;color:var(--ink)"><option value="all">All companies</option><option value="relationships">Documented relationships</option><option value="enforcement">Historical EPA enforcement</option></select><small id="research-filter-description" style="color:var(--muted)">Showing all companies with available research</small></div><div class="grid" id="company-grid"></div><div class="section-head"><h2>What you can discover</h2></div><div class="lower"><div class="panel"><h3>Look beyond the label.</h3><p>A single company profile will bring together documented ownership, political spending, lobbying, environmental filings, and investigative findings—each linked to its original source.</p><div class="track"><span>⌕</span><div><b>Company search</b><small>Explore companies and brands from one place</small></div></div><div class="track"><span>⌁</span><div><b>Trace My Dollar</b><small>See funding relationships with source-level evidence</small></div></div><div class="track"><span>☆</span><div><b>Company watchlist</b><small>Save brands you want to research again</small></div></div></div><div class="panel"><h3>Built for accountability.</h3><p>We distinguish corporate spending, PAC donations, lobbying, grants, investments, and allegations. One category does not prove another.</p><div class="notice"><b>Prototype data policy:</b> This preview lists real company profiles and approved, source-linked disclosures. Inclusion does not imply environmental wrongdoing. Unverified or pending claims are not displayed.</div><p style="margin-top:17px">Future feature: public reports submitted through Funded Destruction's moderated Evidence Desk.</p></div></div></section>
 <section id="profile" class="view"><div class="detail-head"><div><span class="overline" style="color:#597e4d">COMPANY PROFILE · RESEARCH PREVIEW</span><h2 id="profile-name">Company</h2><p>Each company profile displays approved financial research and original sources where available. Political spending, company revenue and environmental issues must not be conflated.</p></div><button class="ghost" id="watch-toggle">☆ Add to watchlist</button></div><div class="tabs" id="profile-tabs"><button class="tab active" data-tab="Financial disclosures">Financial disclosures</button><button class="tab" data-tab="Political spending">Political spending</button><button class="tab" data-tab="Environmental records">Environmental records</button><button class="tab" data-tab="Ownership">Ownership</button><button class="tab" data-tab="Sources & methodology">Sources & methodology</button></div><div id="profile-panel"></div><div id="company-intelligence" class="intel-intro" aria-live="polite"></div></section>
-<section id="trace" class="view"><div class="detail-head"><div><div class="overline" style="color:#597e4d">FEATURE 02 / VISUAL FINANCIAL RESEARCH</div><h2>Trace My Dollar</h2><p>Explore a company's financial relationships—without pretending a consumer purchase can be traced to a particular donation.</p></div></div><div class="panel" style="margin-top:23px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h3 id="trace-heading">Choose a company</h3><button class="ghost" id="trace-change">Change company</button></div><div class="trace-tools"><label for="trace-filter">Show records</label><select id="trace-filter"><option value="all">All documented relationships</option><option value="disclosures">Financial disclosures</option><option value="relationships">Documented relationships</option></select><button class="ghost" id="trace-export">Export selected records (CSV)</button></div><div class="trace-graph" id="trace-graph" role="region" aria-label="Documented relationship network"><p class="trace-empty">Open a company profile with verified research to explore its financial network.</p></div><div class="trace-evidence" id="trace-evidence" aria-live="polite"></div><p class="disclaimer">This research display only shows approved records and clearly distinguishes disclosed financial context from documented relationships. Each future relationship will include the financial instrument, amount where disclosed, date range, entity type, and primary-source link.</p></div><div class="section-head"><h2>What counts as a verified connection?</h2></div><div class="grid"><div class="card"><strong>Direct transaction</strong><p>Documented payment, donation, grant, or investment, attributed to the correct entity.</p></div><div class="card"><strong>Disclosed association</strong><p>Membership or corporate relationship supported by public documents, without assuming a particular payment.</p></div><div class="card"><strong>Reported allegation</strong><p>Clearly attributed reporting or allegation, separate from a legal finding or proven transaction.</p></div></div></section>
+<section id="trace" class="view"><div class="detail-head"><div><div class="overline" style="color:#597e4d">FEATURE 02 / VISUAL FINANCIAL RESEARCH</div><h2>Trace My Dollar</h2><p>Explore a company's financial relationships—without pretending a consumer purchase can be traced to a particular donation.</p></div></div><div class="panel" style="margin-top:23px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h3 id="trace-heading">Choose a company</h3><button class="ghost" id="trace-copy-link" type="button">Copy investigation link</button><button class="ghost" id="trace-change">Back to results</button></div><div class="trace-tools"><label for="trace-filter">Show records</label><select id="trace-filter"><option value="all">All documented relationships</option><option value="disclosures">Financial disclosures</option><option value="relationships">Documented relationships</option></select><button class="ghost" id="trace-export">Export selected records (CSV)</button></div><div class="trace-graph" id="trace-graph" role="region" aria-label="Documented relationship network"><p class="trace-empty">Open a company profile with verified research to explore its financial network.</p></div><div class="trace-evidence" id="trace-evidence" aria-live="polite"></div><p class="disclaimer">This research display only shows approved records and clearly distinguishes disclosed financial context from documented relationships. Each future relationship will include the financial instrument, amount where disclosed, date range, entity type, and primary-source link.</p></div><div class="section-head"><h2>What counts as a verified connection?</h2></div><div class="grid"><div class="card"><strong>Direct transaction</strong><p>Documented payment, donation, grant, or investment, attributed to the correct entity.</p></div><div class="card"><strong>Disclosed association</strong><p>Membership or corporate relationship supported by public documents, without assuming a particular payment.</p></div><div class="card"><strong>Reported allegation</strong><p>Clearly attributed reporting or allegation, separate from a legal finding or proven transaction.</p></div></div></section>
 <section id="watch" class="view"><div class="detail-head"><div><div class="overline" style="color:#597e4d">FEATURE 03 / PERSONAL RESEARCH</div><h2>My Watchlist</h2><p>Save companies you want to explore. Your selections are stored in this browser on this device only.</p></div></div><div class="panel" style="margin-top:23px"><h3>Saved companies</h3><div id="watch-items" class="empty">Nothing saved yet.</div></div><p class="disclaimer">This prototype does not send alerts, create accounts, or transmit your watchlist to a server.</p></section>
 <section id="sources" class="view"><div class="detail-head"><div><div class="overline" style="color:#597e4d">HOW WE RESEARCH</div><h2>Data & Sources</h2><p class="sources-intro">A financial-transparency platform earns trust through documentation. The initial research pipeline will start with public primary records and distinguish them from editorial analysis.</p></div></div><div class="grid" style="margin-top:22px"><div class="card"><strong>FEC</strong><p>U.S. federal campaign-finance records. Contributions must be distinguished by donor type and recipient.</p><a href="https://www.fec.gov/data/" target="_blank" rel="noopener">Browse source ↗</a></div><div class="card"><strong>SEC EDGAR</strong><p>Public-company filings, ownership disclosures, and material financial reporting.</p><a href="https://www.sec.gov/edgar/search/" target="_blank" rel="noopener">Browse source ↗</a></div><div class="card"><strong>EPA ECHO</strong><p>U.S. environmental compliance and enforcement information, with coverage limits.</p><a href="https://echo.epa.gov/" target="_blank" rel="noopener">Browse source ↗</a></div></div><div id="source-intelligence" class="intel-intro"></div><div class="review-card"><h4>Research editor's prepublication checklist</h4><small>Local interactive checklist only; it does not submit approvals or update the public database.</small><label><input type="checkbox" class="review-check"> Confirm the original disclosure document and URLs are still accessible.</label><label><input type="checkbox" class="review-check"> Match spending entity, recipient committee, reporting period, and amounts.</label><label><input type="checkbox" class="review-check"> Separate corporate treasury spending from independently funded PAC contributions.</label><label><input type="checkbox" class="review-check"> Confirm legal/ethical review and corrections contact before publication.</label><label><input type="checkbox" class="review-check"> Check dates, completeness, and whether a more recent report has appeared.</label><p class="review-count" id="review-count">0 / 5 editor checks completed (this device only)</p></div><div class="panel" style="margin-top:20px"><h3>Publication safeguards</h3><ul class="sources"><li>Match every record to the correct legal entity, subsidiary, reporting period, and jurisdiction.</li><li>Publish the original source URL and retrieval or verification date.</li><li>Distinguish spending, donations, lobbying, investments, and memberships.</li><li>Separate allegations, regulatory actions, settlements, and final legal findings.</li><li>Provide a correction and challenge process for published information.</li><li>Do not expose sensitive evidence or contributor identity through public records.</li></ul></div></section>
 <footer><span>© Funded Destruction · Research prototype</span><span>Evidence first. Transparency always. &nbsp;·&nbsp; Not indexed by search engines.</span></footer></main></div><div class="toast" id="toast" role="status"></div>
@@ -275,6 +275,7 @@ if(activeCompany)refreshApprovedResearch();
   companies.splice(0,companies.length,...normalized);
   activeCompany=companies.find(c=>c.slug===currentSlug)||companies[0];
   window.fdCatalogLoaded=true;
+  window.fdRestoreDeepLink?.();
   renderCompanies(document.getElementById('company-search')?.value||'');
   renderWatch();
   if(document.getElementById('profile')?.classList.contains('active'))renderProfile();
@@ -312,6 +313,67 @@ if(activeCompany)refreshApprovedResearch();
   status.textContent='Coverage information unavailable';
   holder.replaceChildren(document.createTextNode('Company research remains accessible below.'));
  }
+})();
+</script>
+<script>
+/* Shareable, navigable investigations. Only known company slugs are accepted. */
+(function(){
+ let restoring=false;
+ const recognized=new Set(['home','profile','trace','watch','sources']);
+ function shareUrl(view,slug){
+  const url=new URL(window.location.href);
+  if(view==='home'||view==='sources'||view==='watch'){
+   url.searchParams.delete('company');
+  }else if(slug){
+   url.searchParams.set('company',slug);
+  }
+  if(view==='home')url.searchParams.delete('view');
+  else url.searchParams.set('view',view);
+  return url.pathname+url.search+url.hash;
+ }
+ const originalNavigate=navigate;
+ navigate=function(view){
+  originalNavigate(view);
+  if(!restoring&&recognized.has(view)){
+   const next=shareUrl(view,activeCompany?.slug);
+   if(next!==window.location.pathname+window.location.search+window.location.hash)window.history.pushState({view,company:activeCompany?.slug||null},'',next);
+  }
+ };
+ function restoreInvestigation(){
+  if(!window.fdCatalogLoaded)return;
+  const params=new URL(window.location.href).searchParams;
+  const slug=params.get('company');
+  const view=params.get('view');
+  if(!recognized.has(view))return;
+  const matching=companies.find(c=>c.slug===slug);
+  if((view==='profile'||view==='trace')&&!matching)return;
+  restoring=true;
+  try{
+   if(matching&&(view==='profile'||view==='trace')){
+    activeCompany=matching;
+    const name=document.getElementById('profile-name');if(name)name.textContent=matching.name;
+    currentTab='Financial disclosures';
+    document.querySelectorAll('[data-tab]').forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));
+    renderProfile();
+   }
+   originalNavigate(view);
+  }finally{restoring=false}
+ }
+ window.fdRestoreDeepLink=restoreInvestigation;
+ window.addEventListener('popstate',restoreInvestigation);
+ const copy=document.getElementById('trace-copy-link');
+ if(copy)copy.addEventListener('click',async()=>{
+  if(!activeCompany?.slug){notify('Choose a company first');return}
+  const url=new URL(shareUrl('trace',activeCompany.slug),window.location.origin).href;
+  try{
+   if(!navigator.clipboard?.writeText)throw Error('Clipboard unavailable');
+   await navigator.clipboard.writeText(url);
+   notify('Investigation link copied');
+  }catch{
+   window.prompt('Copy this investigation link:',url);
+  }
+ });
+ if(window.fdCatalogLoaded)restoreInvestigation();
 })();
 </script>
 </body></html>
