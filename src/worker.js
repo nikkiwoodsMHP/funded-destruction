@@ -70,6 +70,10 @@ async function api(req,env,path,u){
   if((schema.results||[]).length!==6)return err("Database schema incomplete",503);
  }catch{return err("Database temporarily unavailable",503)}
  try{
+ if(req.method==="GET"&&path==="/api/research/overview"){
+  const counts=await env.FD_DB.prepare("SELECT (SELECT COUNT(*) FROM companies) AS companies, (SELECT COUNT(*) FROM financial_records f JOIN sources s ON s.id=f.source_id WHERE f.review_status='approved' AND s.status='approved') AS approved_financial_records, (SELECT COUNT(*) FROM financial_records f JOIN sources s ON s.id=f.source_id WHERE f.category='Environmental enforcement' AND f.review_status='approved' AND s.status='approved') AS approved_enforcement_records, (SELECT COUNT(*) FROM relationships r JOIN sources s ON s.id=r.source_id WHERE r.review_status='approved' AND s.status='approved') AS approved_relationships").first();
+  return out({counts,disclaimer:"Approved, source-linked records only. Database coverage is selective; inclusion is not an allegation and absence of a record is not proof of compliance."});
+ }
  if(req.method==="GET"&&path==="/api/companies"){
   const q=clean(u.searchParams.get("q"),80);
   const catalogSQL="SELECT c.slug,c.name,c.sector,\n (SELECT COUNT(*) FROM financial_records f JOIN sources s ON s.id=f.source_id\n WHERE f.company_id=c.id AND f.review_status='approved' AND s.status='approved') AS approved_records,\n (SELECT COUNT(*) FROM relationships r JOIN sources s ON s.id=r.source_id\n WHERE r.company_id=c.id AND r.review_status='approved' AND s.status='approved') AS approved_relationships\n FROM companies c";
