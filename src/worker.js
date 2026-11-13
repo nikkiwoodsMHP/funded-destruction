@@ -56,7 +56,7 @@ async function oneTimeEpaImport(env){
 async function api(req,env,path,u){
  if(req.method==="GET"&&path==="/api/_preview/seed-epa"){
   if(env.EPA_SEED_ENABLED!=="true")return err("Not found",404);
-  try{return out(await oneTimeEpaImport(env));}catch(e){return err("Import failed: "+String(e?.message||e).slice(0,160),500)}
+  try{return out(await oneTimeEpaImport(env));}catch(e){return out({ok:false,error:String(e?.message||e).slice(0,280)},200)}
  }
 
 
