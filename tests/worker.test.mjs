@@ -88,3 +88,19 @@ test('research overview exposes only approved, source-linked aggregate counts',a
  assert(observed.some(sql=>sql.includes("r.review_status='approved'")&&sql.includes("s.status='approved'")));
  assert.match(value.disclaimer,/inclusion is not an allegation/);
 });
+
+test('catalog counts environmental enforcement and relationships only with approved sources',async()=>{
+ const observed=[];
+ const db={prepare(sql){
+  observed.push(sql);
+  if(sql.includes('sqlite_master'))return {all:async()=>({results:['companies','sources','financial_records','relationships','evidence_reports','editorial_audit'].map(name=>({name}))})};
+  return {all:async()=>({results:[{slug:'walmart',name:'Walmart',sector:'Retail',approved_records:2,approved_enforcement_records:1,approved_relationships:1}]})};
+ }};
+ const response=await call('/api/companies',{}, {...env,FD_DB:db});
+ assert.equal(response.status,200);
+ const catalog=await data(response);
+ assert.equal(catalog.companies[0].approved_enforcement_records,1);
+ assert.equal(catalog.companies[0].approved_relationships,1);
+ assert(observed.some(sql=>sql.includes("f.category='Environmental enforcement'")&&sql.includes("f.review_status='approved'")&&sql.includes("s.status='approved'")));
+ assert(observed.some(sql=>sql.includes("r.review_status='approved'")&&sql.includes("s.status='approved'")));
+});
