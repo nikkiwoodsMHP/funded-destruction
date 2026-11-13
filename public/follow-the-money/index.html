@@ -343,7 +343,7 @@ if(activeCompany)refreshApprovedResearch();
   if(!window.fdCatalogLoaded)return;
   const params=new URL(window.location.href).searchParams;
   const slug=params.get('company');
-  const view=params.get('view');
+  const view=params.get('view')||'home';
   if(!recognized.has(view))return;
   const matching=companies.find(c=>c.slug===slug);
   if((view==='profile'||view==='trace')&&!matching)return;
