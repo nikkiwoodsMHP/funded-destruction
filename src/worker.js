@@ -126,6 +126,16 @@ async function api(req,env,path,u){
 }
 export default {async fetch(req,env){
  const u=new URL(req.url),path=u.pathname;
+ // Emergency production safeguard: keep the original public site separate from this research prototype.
+ if(env.PUBLIC_SITE_LOCKDOWN==="true"){
+  if(path==="/"||path==="/index.html"){
+   return Response.redirect("https://fundeddestruction.netlify.app/",302);
+  }
+  if(!path.startsWith("/editor/")){
+   return new Response("Private research preview unavailable",{status:404,headers:security});
+  }
+ }
+
  if(path.startsWith("/api/"))return api(req,env,path,u);
  if(path.startsWith("/editor/")){
   if(!await access(req,env))return new Response("Verified Cloudflare Access login required",{status:401,headers:security});
