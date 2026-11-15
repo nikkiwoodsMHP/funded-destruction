@@ -11,7 +11,8 @@
     ]
   },
   "vars": {
-    "INTAKE_ENABLED": "false"
+    "INTAKE_ENABLED": "false",
+    "PUBLIC_SITE_LOCKDOWN": "true"
   },
   "d1_databases": [
     {
